@@ -1,0 +1,55 @@
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/cb-yourl-cloud:$COMMIT_SHA', '.']
+  
+  # Push the container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/cb-yourl-cloud:$COMMIT_SHA']
+  
+  # Deploy container image to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'cb-yourl-cloud'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/cb-yourl-cloud:$COMMIT_SHA'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--port'
+      - '3000'
+      - '--memory'
+      - '512Mi'
+      - '--cpu'
+      - '1'
+      - '--max-instances'
+      - '10'
+      - '--set-env-vars'
+      - 'NODE_ENV=production'
+      - '--set-env-vars'
+      - 'PORT=3000'
+      - '--set-env-vars'
+      - 'MONGODB_URI=${_MONGODB_URI}'
+      - '--set-env-vars'
+      - 'JWT_SECRET=${_JWT_SECRET}'
+      - '--set-env-vars'
+      - 'JWT_EXPIRES_IN=24h'
+      - '--set-env-vars'
+      - 'ALLOWED_ORIGINS=https://cb.yourl.cloud,https://yourl.cloud'
+
+# Store images in Google Container Registry
+images:
+  - 'gcr.io/$PROJECT_ID/cb-yourl-cloud:$COMMIT_SHA'
+
+# Build timeout
+timeout: '1200s'
+
+# Available substitutions
+substitutions:
+  _MONGODB_URI: 'mongodb+srv://yourl-cloud:password@cluster.mongodb.net/cb-yourl-cloud'
+  _JWT_SECRET: 'your-super-secret-jwt-key-change-this-in-production'
