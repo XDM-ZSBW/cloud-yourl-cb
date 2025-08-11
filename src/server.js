@@ -70,6 +70,22 @@ app.use('/api/products', authenticateToken, productRoutes);
 app.use('/api/system', systemRoutes);
 app.use('/api/utilities', authenticateToken, utilityRoutes);
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    service: 'cb-yourl-cloud',
+    version: '1.0.0',
+    description: 'Secure clipboard history service for friends and family',
+    status: 'operational',
+    endpoints: {
+      health: '/health',
+      api: '/api',
+      documentation: 'https://cb.yourl.cloud/docs'
+    },
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ 
