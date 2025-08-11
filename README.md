@@ -33,8 +33,8 @@ A secure, cloud-based clipboard history service designed for friends and family 
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/cb-yourl-cloud.git
-   cd cb-yourl-cloud
+   git clone https://github.com/XDM-ZSBW/cloud-yourl-cb.git
+   cd cloud-yourl-cb
    ```
 
 2. **Install dependencies**
@@ -325,8 +325,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Support
 
 - **Documentation:** [API Documentation](API_DOCUMENTATION.md)
-- **Issues:** [GitHub Issues](https://github.com/yourusername/cb-yourl-cloud/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/yourusername/cb-yourl-cloud/discussions)
+- **Issues:** [GitHub Issues](https://github.com/XDM-ZSBW/cloud-yourl-cb/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/XDM-ZSBW/cloud-yourl-cb/discussions)
 - **Email:** support@cb.yourl.cloud
 
 ## Roadmap
