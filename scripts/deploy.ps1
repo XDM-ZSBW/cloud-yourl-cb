@@ -6,8 +6,8 @@ param(
 
 # Configuration
 $PROJECT_ID = "yourl-cloud"
-$SERVICE_NAME = "cb-yourl-cloud"
-$REGION = "us-central1"
+$SERVICE_NAME = "clipboard-bridge"
+$REGION = "us-west1"
 $IMAGE_NAME = "gcr.io/$PROJECT_ID/$SERVICE_NAME"
 
 Write-Host "🚀 Deploying cb-yourl-cloud to Google Cloud Run..." -ForegroundColor Yellow

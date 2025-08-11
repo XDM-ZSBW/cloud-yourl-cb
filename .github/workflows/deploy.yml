@@ -8,8 +8,8 @@ on:
 
 env:
   PROJECT_ID: yourl-cloud
-  SERVICE_NAME: cb-yourl-cloud
-  REGION: us-central1
+  SERVICE_NAME: clipboard-bridge
+  REGION: us-west1
 
 jobs:
   deploy:
@@ -50,8 +50,31 @@ jobs:
           docker build -t gcr.io/$PROJECT_ID/$SERVICE_NAME:${{ github.sha }} .
           docker push gcr.io/$PROJECT_ID/$SERVICE_NAME:${{ github.sha }}
           
+      - name: Get existing environment variables
+        id: get-env
+        run: |
+          # Get existing environment variables from current service
+          EXISTING_ENV=$(gcloud run services describe $SERVICE_NAME --region=$REGION --format="value(spec.template.spec.containers[0].env[].name,spec.template.spec.containers[0].env[].value)" 2>/dev/null || echo "")
+          echo "existing_env=$EXISTING_ENV" >> $GITHUB_OUTPUT
+          
       - name: Deploy to Cloud Run
         run: |
+          # Prepare environment variables
+          ENV_VARS="NODE_ENV=production,PORT=3000,JWT_EXPIRES_IN=24h,ALLOWED_ORIGINS=https://cb.yourl.cloud,https://yourl.cloud"
+          
+          # Add existing MongoDB URI and JWT Secret if they exist
+          if [[ "${{ steps.get-env.outputs.existing_env }}" == *"MONGODB_URI"* ]]; then
+            MONGODB_URI=$(echo "${{ steps.get-env.outputs.existing_env }}" | grep "MONGODB_URI" | cut -d' ' -f2)
+            ENV_VARS="$ENV_VARS,MONGODB_URI=$MONGODB_URI"
+          fi
+          
+          if [[ "${{ steps.get-env.outputs.existing_env }}" == *"JWT_SECRET"* ]]; then
+            JWT_SECRET=$(echo "${{ steps.get-env.outputs.existing_env }}" | grep "JWT_SECRET" | cut -d' ' -f2)
+            ENV_VARS="$ENV_VARS,JWT_SECRET=$JWT_SECRET"
+          fi
+          
+          echo "Using environment variables: $ENV_VARS"
+          
           gcloud run deploy $SERVICE_NAME \
             --image gcr.io/$PROJECT_ID/$SERVICE_NAME:${{ github.sha }} \
             --region $REGION \
@@ -61,10 +84,7 @@ jobs:
             --memory 512Mi \
             --cpu 1 \
             --max-instances 10 \
-            --set-env-vars NODE_ENV=production,PORT=3000,JWT_EXPIRES_IN=24h \
-            --set-env-vars MONGODB_URI="${{ secrets.MONGODB_URI }}" \
-            --set-env-vars JWT_SECRET="${{ secrets.JWT_SECRET }}" \
-            --set-env-vars ALLOWED_ORIGINS="https://cb.yourl.cloud,https://yourl.cloud"
+            --set-env-vars "$ENV_VARS"
             
       - name: Show service URL
         run: |
